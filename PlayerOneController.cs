@@ -1,28 +1,27 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class Player1Controller : MonoBehaviour
+public class PlayerOneController : MonoBehaviour
 {
     PlayerInput playerInput;
     InputAction moveAction;
     Rigidbody rb;
+
     public float moveSpeed = 100f;
-    public float jumpForce = 1000f;
+    public float jumpForce = 10f;
     private bool isGrounded = true;
+    private float fixedZPosition;
 
     void Start()
     {
         playerInput = GetComponent<PlayerInput>();
-        moveAction = playerInput.actions.FindAction("Player1Move");
-        rb = GetComponent<Rigidbody>(); 
+        moveAction = playerInput.actions["P1Move"];
+        rb = GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotation;
-
-        Debug.Log("Moving");
+        fixedZPosition = transform.position.z; // Record the initial z position
     }
 
-    void Update()
+    void FixedUpdate()
     {
         MovePlayer();
     }
@@ -30,20 +29,22 @@ public class Player1Controller : MonoBehaviour
     void MovePlayer()
     {
         Vector2 direction = moveAction.ReadValue<Vector2>();
-        // Restrict movement to only the X-axis (left and right)
-        Vector3 move = new Vector3(direction.x, 0, 0) * moveSpeed * Time.deltaTime;
-        transform.position += move;
+        Vector3 move = new Vector3(direction.x, 0f, 0f) * moveSpeed * Time.deltaTime; // No movement on the z-axis
 
-        if (isGrounded && direction.y > 0) 
+        // Apply horizontal movement
+        rb.MovePosition(rb.position + move);
+
+        // Check for jump input
+        if (isGrounded && direction.y > 0)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             isGrounded = false;
         }
-        /*else if (isGrounded && direction.y < 0) 
-        {
-            rb.AddForce(Vector3.down * jumpForce, ForceMode.Impulse);
-            isGrounded = false;
-        }*/
+
+        // Ensure z position remains fixed
+        Vector3 currentPosition = rb.position;
+        currentPosition.z = fixedZPosition;
+        rb.position = currentPosition;
     }
 
     void OnCollisionEnter(Collision collision)

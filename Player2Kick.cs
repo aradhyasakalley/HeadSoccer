@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class Player1Kick : MonoBehaviour
+public class Player2Kick : MonoBehaviour
 {
     public Transform foot;
     public float kickAngle = 60f;
