@@ -1,16 +1,19 @@
 using System;
 using UnityEngine;
+using System.Collections;
 
-public class GoalZoneLeft : MonoBehaviour
+public class GoalZone : MonoBehaviour
 {
     public static event Action<int> OnGoalScored;
+
+    public int side;
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Football"))
         {
-            Debug.Log("Goal on left side!!");
-            OnGoalScored?.Invoke(0);
+            Debug.Log("Goal on " + side + "side!!");
+            OnGoalScored?.Invoke(side);
         }
     }
 }
