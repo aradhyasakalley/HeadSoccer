@@ -5,6 +5,7 @@ public class FootballBehaviour : MonoBehaviour
     private Rigidbody rb;
     private float maxYPosition = 4.6f;
     private float bounceForce = 1f;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -13,7 +14,7 @@ public class FootballBehaviour : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (rb.velocity.magnitude == 0 || transform.position.y < -4.0)
+        if (rb.velocity.magnitude == 0 || transform.position.y < -3.16)
         {
             rb.AddForce(Vector3.up * bounceForce, ForceMode.Impulse);
         }

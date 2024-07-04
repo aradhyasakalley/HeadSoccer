@@ -13,7 +13,7 @@ public class Player2Kick : MonoBehaviour
     private PlayerInput playerInput;
     private InputAction kickAction;
     private Quaternion originalRotation;
-    private bool isKicking = false;
+    //private bool isKicking = false;
 
     void Start()
     {
@@ -51,7 +51,7 @@ public class Player2Kick : MonoBehaviour
 
     IEnumerator KickRoutine()
     {
-        isKicking = true;
+        //isKicking = true;
         ApplyKickForce();
 
         float elapsedTime = 0f;
@@ -76,7 +76,7 @@ public class Player2Kick : MonoBehaviour
         }
 
         foot.localRotation = originalRotation;
-        isKicking = false;
+        //isKicking = false;
     }
 
     void ApplyKickForce()
