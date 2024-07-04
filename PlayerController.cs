@@ -28,7 +28,8 @@ public class PlayerController : MonoBehaviour
         
         rb = GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotation;
-        fixedZPosition = transform.position.z; // Record the initial z position
+        // Record the initial z position
+        fixedZPosition = transform.position.z; 
     }
 
     void FixedUpdate()
@@ -39,7 +40,8 @@ public class PlayerController : MonoBehaviour
     void MovePlayer()
     {
         Vector2 direction = moveAction.ReadValue<Vector2>();
-        Vector3 move = new Vector3(direction.x, 0f, 0f) * moveSpeed * Time.deltaTime; // No movement on the z-axis
+        // No movement on the z-axis
+        Vector3 move = new Vector3(direction.x, 0f, 0f) * moveSpeed * Time.deltaTime; 
 
         // Apply horizontal movement
         rb.MovePosition(rb.position + move);

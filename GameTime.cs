@@ -11,6 +11,7 @@ public class GameTime : MonoBehaviour
     {
         if (isRunning)
         {
+            // *5 for faster timer 
             elapsedTime += Time.deltaTime * 5;
             int minutes = Mathf.FloorToInt(elapsedTime / 60);
             int seconds = Mathf.FloorToInt(elapsedTime % 60);
