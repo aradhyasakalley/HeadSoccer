@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class GameManager : MonoBehaviour
@@ -10,7 +11,7 @@ public class GameManager : MonoBehaviour
     private Vector3 goalBallPosition = new Vector3(0.04f, 3f, 90f);
     private Quaternion goalBallRotation = Quaternion.Euler(0f, 90f, 0f);
     private float pauseTime = 2f;
-
+    [SerializeField] TextMeshProUGUI winnerText;
     public TMP_Text score_left;
     public TMP_Text score_right;
 
@@ -49,11 +50,13 @@ public class GameManager : MonoBehaviour
     private void OnEnable()
     {
         GoalZone.OnGoalScored += HandleGoalScored;
+        GameTime.OnGameTimeOver += HandleGameTimeOver;
     }
 
     private void OnDisable()
     {
         GoalZone.OnGoalScored -= HandleGoalScored;
+        GameTime.OnGameTimeOver -= HandleGameTimeOver;
     }
 
     private void HandleGoalScored(int side)
@@ -165,5 +168,32 @@ public class GameManager : MonoBehaviour
             player2.transform.position = player2StartPosition;
             player2.transform.rotation = player2StartRotation;
         }
+    }
+    private IEnumerator EndingGame()
+    {
+        Debug.Log("Started co routine");
+        yield return new WaitForSeconds(2f);
+        SceneManager.LoadSceneAsync(0);
+    }
+    private void HandleGameTimeOver()
+    {
+        Debug.Log("Time over!");
+        if (leftSideGoals > rightSideGoals)
+        {
+            winnerText.text = "Blue Wins !";
+            winnerText.gameObject.SetActive(true);
+        }
+        else if (rightSideGoals > leftSideGoals)
+        {
+            winnerText.text = "Red Wins !";
+            winnerText.gameObject.SetActive(true);
+        }
+        else
+        {
+            //Time.timeScale = 0f;
+            winnerText.text = "Draw !";
+            winnerText.gameObject.SetActive(true);
+        }
+        StartCoroutine(EndingGame());
     }
 }

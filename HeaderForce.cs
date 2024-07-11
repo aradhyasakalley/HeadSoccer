@@ -10,7 +10,7 @@ public class HeaderForce : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Football"))
         {
-            Debug.Log("Header !!");
+            //Debug.Log("Header !!");
 
             Rigidbody footballRigidbody = other.GetComponent<Rigidbody>();
 
@@ -19,11 +19,13 @@ public class HeaderForce : MonoBehaviour
                 if ( forceDirection == 0 )
                 {
                     Vector3 forceDirection = transform.right;
+                    Debug.Log(forceDirection);
                     footballRigidbody.AddForce(forceDirection * forceMagnitude);
-                }
+                }   
                 else
                 {
-                    Vector3 forceDirection = transform.right * -1;
+                    Vector3 forceDirection = transform.right;
+                    Debug.Log(forceDirection);
                     footballRigidbody.AddForce(forceDirection * forceMagnitude);
                 }
                 
