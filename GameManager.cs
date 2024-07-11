@@ -16,9 +16,44 @@ public class GameManager : MonoBehaviour
 
     public GameTime gameTime;
 
+    public PlayerController player1;
+    public PlayerController player2;
+    private Vector3 player1StartPosition;
+    private Quaternion player1StartRotation;
+    private Vector3 player2StartPosition;
+    private Quaternion player2StartRotation;
+
+    private void Start()
+    {
+        if (player1 != null)
+        {
+            player1StartPosition = player1.transform.position;
+            player1StartRotation = player1.transform.rotation;
+        }
+        else
+        {
+            Debug.LogError("Player1 is not assigned in the GameManager.");
+        }
+
+        if (player2 != null)
+        {
+            player2StartPosition = player2.transform.position;
+            player2StartRotation = player2.transform.rotation;
+        }
+        else
+        {
+            Debug.LogError("Player2 is not assigned in the GameManager.");
+        }
+    }
+
     private void OnEnable()
     {
         GoalZone.OnGoalScored += HandleGoalScored;
+    }
+
+    private void OnDisable()
+    {
+        GoalZone.OnGoalScored -= HandleGoalScored;
     }
 
     private void HandleGoalScored(int side)
@@ -36,27 +71,99 @@ public class GameManager : MonoBehaviour
             Debug.Log($"Left Side Goals: {leftSideGoals}, Right Side Goals: {rightSideGoals}");
         }
         gameTime.PauseTimer();
-        StartCoroutine(PauseAndResetBall());
+        StartCoroutine(PauseAndResetPositions());
     }
 
-    private IEnumerator PauseAndResetBall()
+    private IEnumerator PauseAndResetPositions()
     {
         // Freeze the ball
         Rigidbody ballRb = ball.GetComponent<Rigidbody>();
-        ballRb.velocity = Vector3.zero;
-        ballRb.angularVelocity = Vector3.zero;
-        ballRb.constraints = RigidbodyConstraints.FreezeAll;
+        if (ballRb != null)
+        {
+            ballRb.velocity = Vector3.zero;
+            ballRb.angularVelocity = Vector3.zero;
+            ballRb.constraints = RigidbodyConstraints.FreezeAll;
+        }
+        else
+        {
+            Debug.LogError("Ball Rigidbody is not assigned or found.");
+        }
+
+        // Freeze the players
+        if (player1 != null)
+        {
+            Rigidbody player1Rb = player1.GetComponent<Rigidbody>();
+            if (player1Rb != null)
+            {
+                player1Rb.velocity = Vector3.zero;
+                player1Rb.angularVelocity = Vector3.zero;
+                player1Rb.constraints = RigidbodyConstraints.FreezeAll;
+            }
+        }
+
+        if (player2 != null)
+        {
+            Rigidbody player2Rb = player2.GetComponent<Rigidbody>();
+            if (player2Rb != null)
+            {
+                player2Rb.velocity = Vector3.zero;
+                player2Rb.angularVelocity = Vector3.zero;
+                player2Rb.constraints = RigidbodyConstraints.FreezeAll;
+            }
+        }
 
         Debug.Log("Goal pause time!!");
         yield return new WaitForSeconds(pauseTime);
-        ballRb.constraints = RigidbodyConstraints.None;
+
+        // Unfreeze the ball
+        if (ballRb != null)
+        {
+            ballRb.constraints = RigidbodyConstraints.None;
+            ResetBallPosition();
+        }
+
+        // Unfreeze and constrain the players
+        if (player1 != null)
+        {
+            Rigidbody player1Rb = player1.GetComponent<Rigidbody>();
+            if (player1Rb != null)
+            {
+                player1Rb.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionZ;
+            }
+        }
+
+        if (player2 != null)
+        {
+            Rigidbody player2Rb = player2.GetComponent<Rigidbody>();
+            if (player2Rb != null)
+            {
+                player2Rb.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionZ;
+            }
+        }
+
+        ResetPlayerPositions();
+
         gameTime.ResumeTimer();
-        ResetBallPosition();
     }
 
     private void ResetBallPosition()
     {
         ball.transform.position = goalBallPosition;
         ball.transform.rotation = goalBallRotation;
+    }
+
+    private void ResetPlayerPositions()
+    {
+        if (player1 != null)
+        {
+            player1.transform.position = player1StartPosition;
+            player1.transform.rotation = player1StartRotation;
+        }
+
+        if (player2 != null)
+        {
+            player2.transform.position = player2StartPosition;
+            player2.transform.rotation = player2StartRotation;
+        }
     }
 }

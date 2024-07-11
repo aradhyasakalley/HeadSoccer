@@ -10,7 +10,7 @@ public class FootballBehaviour : MonoBehaviour
     private float downwardForce = 0.5f;
     private float maxXPosition = 10.95f;
     private float minXPosition = -11.95f;
-    private float sideBounceForce = 1f; // Adjust this value as needed
+    private float sideBounceForce = 1f; 
 
     void Start()
     {

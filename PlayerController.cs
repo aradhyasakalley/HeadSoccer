@@ -6,7 +6,8 @@ public class PlayerController : MonoBehaviour
     PlayerInput playerInput;
     InputAction moveAction;
     Rigidbody rb;
-
+    
+    public static PlayerController instance;
     public float moveSpeed = 100f;
     public float jumpForce = 10f;
     private bool isGrounded = true;
@@ -16,6 +17,7 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        instance = this;
         playerInput = GetComponent<PlayerInput>();
         if (player == 1)
         {
@@ -25,11 +27,10 @@ public class PlayerController : MonoBehaviour
         {
             moveAction = playerInput.actions["P2Move"];
         }
-        
+
         rb = GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotation;
-        // Record the initial z position
-        fixedZPosition = transform.position.z; 
+        fixedZPosition = transform.position.z;
     }
 
     void FixedUpdate()
@@ -40,23 +41,23 @@ public class PlayerController : MonoBehaviour
     void MovePlayer()
     {
         Vector2 direction = moveAction.ReadValue<Vector2>();
-        // No movement on the z-axis
-        Vector3 move = new Vector3(direction.x, 0f, 0f) * moveSpeed * Time.deltaTime; 
+        Vector3 move = new Vector3(direction.x, 0f, 0f) * moveSpeed * Time.deltaTime;
 
-        // Apply horizontal movement
-        rb.MovePosition(rb.position + move);
+        Vector3 newPosition = rb.position + move;
 
-        // Check for jump input
+        // Clamp the x position within the specified range
+        newPosition.x = Mathf.Clamp(newPosition.x, -8.71f, 8.60f);
+
+        // Maintain the fixed z position
+        newPosition.z = fixedZPosition;
+
+        rb.MovePosition(newPosition);
+
         if (isGrounded && direction.y > 0)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             isGrounded = false;
         }
-
-        // Ensure z position remains fixed
-        Vector3 currentPosition = rb.position;
-        currentPosition.z = fixedZPosition;
-        rb.position = currentPosition;
     }
 
     void OnCollisionEnter(Collision collision)
