@@ -10,8 +10,10 @@ public class GameManager : MonoBehaviour
     private int rightSideGoals = 0;
     private Vector3 goalBallPosition = new Vector3(0.04f, 3f, 90f);
     private Quaternion goalBallRotation = Quaternion.Euler(0f, 90f, 0f);
-    private float pauseTime = 2f;
+    private float pauseTime = 1f; // Reduced pause time for half-time
     [SerializeField] TextMeshProUGUI winnerText;
+    [SerializeField] TextMeshProUGUI goalText;
+    [SerializeField] TextMeshProUGUI halfTimeText;
     public TMP_Text score_left;
     public TMP_Text score_right;
 
@@ -51,16 +53,21 @@ public class GameManager : MonoBehaviour
     {
         GoalZone.OnGoalScored += HandleGoalScored;
         GameTime.OnGameTimeOver += HandleGameTimeOver;
+        GameTime.OnHalfTime += HandleHalfTime;
     }
 
     private void OnDisable()
     {
         GoalZone.OnGoalScored -= HandleGoalScored;
         GameTime.OnGameTimeOver -= HandleGameTimeOver;
+        GameTime.OnHalfTime -= HandleHalfTime;
     }
 
     private void HandleGoalScored(int side)
     {
+        gameTime.PauseTimer();
+        StartCoroutine(PauseAndResetPositions());
+
         if (side == 0)
         {
             leftSideGoals++;
@@ -73,8 +80,6 @@ public class GameManager : MonoBehaviour
             score_right.text = rightSideGoals.ToString();
             Debug.Log($"Left Side Goals: {leftSideGoals}, Right Side Goals: {rightSideGoals}");
         }
-        gameTime.PauseTimer();
-        StartCoroutine(PauseAndResetPositions());
     }
 
     private IEnumerator PauseAndResetPositions()
@@ -93,31 +98,16 @@ public class GameManager : MonoBehaviour
         }
 
         // Freeze the players
-        if (player1 != null)
-        {
-            Rigidbody player1Rb = player1.GetComponent<Rigidbody>();
-            if (player1Rb != null)
-            {
-                player1Rb.velocity = Vector3.zero;
-                player1Rb.angularVelocity = Vector3.zero;
-                player1Rb.constraints = RigidbodyConstraints.FreezeAll;
-            }
-        }
+        FreezePlayer(player1);
+        FreezePlayer(player2);
 
-        if (player2 != null)
-        {
-            Rigidbody player2Rb = player2.GetComponent<Rigidbody>();
-            if (player2Rb != null)
-            {
-                player2Rb.velocity = Vector3.zero;
-                player2Rb.angularVelocity = Vector3.zero;
-                player2Rb.constraints = RigidbodyConstraints.FreezeAll;
-            }
-        }
+        goalText.text = "GOAL !!!";
+        goalText.gameObject.SetActive(true);
 
         Debug.Log("Goal pause time!!");
         yield return new WaitForSeconds(pauseTime);
 
+        goalText.gameObject.SetActive(false);
         // Unfreeze the ball
         if (ballRb != null)
         {
@@ -126,27 +116,38 @@ public class GameManager : MonoBehaviour
         }
 
         // Unfreeze and constrain the players
-        if (player1 != null)
-        {
-            Rigidbody player1Rb = player1.GetComponent<Rigidbody>();
-            if (player1Rb != null)
-            {
-                player1Rb.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionZ;
-            }
-        }
-
-        if (player2 != null)
-        {
-            Rigidbody player2Rb = player2.GetComponent<Rigidbody>();
-            if (player2Rb != null)
-            {
-                player2Rb.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionZ;
-            }
-        }
+        UnfreezePlayer(player1);
+        UnfreezePlayer(player2);
 
         ResetPlayerPositions();
 
         gameTime.ResumeTimer();
+    }
+
+    private void FreezePlayer(PlayerController player)
+    {
+        if (player != null)
+        {
+            Rigidbody playerRb = player.GetComponent<Rigidbody>();
+            if (playerRb != null)
+            {
+                playerRb.velocity = Vector3.zero;
+                playerRb.angularVelocity = Vector3.zero;
+                playerRb.constraints = RigidbodyConstraints.FreezeAll;
+            }
+        }
+    }
+
+    private void UnfreezePlayer(PlayerController player)
+    {
+        if (player != null)
+        {
+            Rigidbody playerRb = player.GetComponent<Rigidbody>();
+            if (playerRb != null)
+            {
+                playerRb.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionZ;
+            }
+        }
     }
 
     private void ResetBallPosition()
@@ -169,15 +170,21 @@ public class GameManager : MonoBehaviour
             player2.transform.rotation = player2StartRotation;
         }
     }
+
     private IEnumerator EndingGame()
     {
-        Debug.Log("Started co routine");
-        yield return new WaitForSeconds(2f);
+        Debug.Log("Started coroutine");
+        yield return new WaitForSeconds(2f); 
         SceneManager.LoadSceneAsync(0);
     }
+
     private void HandleGameTimeOver()
     {
         Debug.Log("Time over!");
+
+        // Deactivate the goal text
+        goalText.gameObject.SetActive(false);
+
         if (leftSideGoals > rightSideGoals)
         {
             winnerText.text = "Blue Wins !";
@@ -190,10 +197,24 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            //Time.timeScale = 0f;
             winnerText.text = "Draw !";
             winnerText.gameObject.SetActive(true);
         }
         StartCoroutine(EndingGame());
     }
+
+    private void HandleHalfTime()
+    {
+        Debug.Log("Half-time!");
+
+        // Display half-time text and pause the game
+        halfTimeText.text = "HALF TIME !!";
+        halfTimeText.gameObject.SetActive(true);
+
+        StartCoroutine(PauseAndResetPositions());
+
+        halfTimeText.gameObject.SetActive(false);
+    }
+
 }
+
